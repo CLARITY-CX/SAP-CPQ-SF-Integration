@@ -24,12 +24,11 @@
                 let exceptionType = errorMsgObject[0].hasOwnProperty('exceptionType') ? errorMsgObject[0].exceptionType + '. ' : '';
                 let stackTrace = errorMsgObject[0].hasOwnProperty('stackTrace') ? '. ' + errorMsgObject[0].stackTrace : '';
                 let finalMessage = exceptionType + errorMsgObject[0].message + stackTrace;
-                var showToast = component.find('notifyId').showToast({
+                component.find('notifyId').showToast({
                     variant: "error",
                     title: "Error!",
                     message: finalMessage
                 });
-                showToast.fire();
             } 
         }); 
         $A.enqueueAction(action);   
