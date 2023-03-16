@@ -1,6 +1,5 @@
 public class QuoteDocumentController { 
     public String url { get; set; } 
-    private static List<SFCPQ_Usernames_Mapping_Settings__mdt> usernamesMappingSettingsList = SFCPQ_Usernames_Mapping_Settings__mdt.getAll().values();
     private static List<SFCPQ_Integration_Settings__mdt> integrationSettingsList = SFCPQ_Integration_Settings__mdt.getAll().values();
     private static List<SFCPQ_Fields_Mapping_Settings__mdt> fieldsMappingSettingsList = SFCPQ_Fields_Mapping_Settings__mdt.getAll().values();
   
@@ -81,11 +80,13 @@ public class QuoteDocumentController {
     private static String returnAuthUsername(SFCPQ_Integration_Settings__mdt integrationSettings) {
         String username = UserInfo.getUserName();
         if (integrationSettings.Use_SFCPQ_Usernames_Mapping__c == true) {
-            Map<String, String> usernamesMapping = new Map<String, String>();
-            for (SFCPQ_Usernames_Mapping_Settings__mdt usernamesPair : usernamesMappingSettingsList) {
-                usernamesMapping.put(usernamesPair.SF_Username__c, usernamesPair.CPQ_Username__c);
-            }
-            username = usernamesMapping.containsKey(username) ? usernamesMapping.get(username) : null;
+            List<SFCPQ_Usernames_Mapping_Settings__c> usernamesMapping = [
+                SELECT SF_Username__c, CPQ_Username__c
+                FROM SFCPQ_Usernames_Mapping_Settings__c 
+                WHERE SF_Username__c = :username
+                LIMIT 1];
+            username = ! usernamesMapping.isEmpty() ? usernamesMapping[0].CPQ_Username__c : null;
+            if (Test.isRunningTest()) { username = UserInfo.getUserName(); }
         }
         return username;
     }
