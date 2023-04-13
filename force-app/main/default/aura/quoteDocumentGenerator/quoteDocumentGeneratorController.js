@@ -2,33 +2,33 @@
     doInit : function(component, event, helper) { 
         let action = component.get("c.getAccessToken");
         action.setCallback(this,function(response){ 
-            let accessToken; 
             let state = response.getState();
-            if (state === 'SUCCESS'){ 
-                accessToken = response.getReturnValue(); 
-                var recordId = component.get("v.recordId");
+            let experience = component.get("v.experience");
+            if (state === 'SUCCESS') { 
+                let recordId = experience == 'lightning' ? component.get("v.recordId") : component.get("v.sobjectid"); 
                 //Get ParentId if recordId is empty
                 if ( ! recordId ) {
-                    var parameterValue = helper.getParameterByName(component , event, 'inContextOfRef');
-                    var addressableContext = JSON.parse(window.atob(parameterValue));
+                    let parameterValue = helper.getParameterByName(component , event, 'inContextOfRef');
+                    let addressableContext = JSON.parse(window.atob(parameterValue));
                     recordId = addressableContext.attributes.recordId;
                 }
-                var urlEvent = $A.get("e.force:navigateToURL"); 
-                urlEvent.setParams({ 
-                    "url": "/apex/cpqquoterouter?recordid=" + recordId + "&token=" + accessToken + "&action=create" 
-                }); 
-                urlEvent.fire();
+                let accessToken = response.getReturnValue();
+                let url = "/apex/cpqquoterouter?recordid=" + recordId + "&token=" + accessToken + "&action=create";
+                if (experience == 'lightning') {
+                    let urlEvent = $A.get("e.force:navigateToURL");
+                    urlEvent.setParams({ 
+                        "url": url
+                    }); 
+                    urlEvent.fire();
+                } else {
+                    window.location = url;
+                }
             } else if (state === 'ERROR') {
-                $A.get("e.force:closeQuickAction").fire();
-                let errorMsgObject = response.getError();
-                let exceptionType = errorMsgObject[0].hasOwnProperty('exceptionType') ? errorMsgObject[0].exceptionType + '. ' : '';
-                let stackTrace = errorMsgObject[0].hasOwnProperty('stackTrace') ? '. ' + errorMsgObject[0].stackTrace : '';
-                let finalMessage = exceptionType + errorMsgObject[0].message + stackTrace;
-                component.find('notifyId').showToast({
-                    variant: "error",
-                    title: "Error!",
-                    message: finalMessage
-                });
+                if (experience == 'lightning') {
+                    helper.showToastMessage(component, response, 'Error!', 'error');
+                } else {
+                    helper.showToastMessageInSFClassic(component, response, 'Error!', 'error');
+                }
             } 
         }); 
         $A.enqueueAction(action);   

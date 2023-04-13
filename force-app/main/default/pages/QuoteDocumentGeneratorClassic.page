@@ -1,0 +1,13 @@
+<apex:page standardController="Opportunity">
+    <apex:includeLightning/>
+    <div id="frame"/>
+    <script>
+        $Lightning.use("c:quoteDocumentGeneratorApp", function() {
+            $Lightning.createComponent("c:quoteDocumentGenerator",
+                { experience: 'classic', sobjectid: '{!Opportunity.Id}' },
+                "frame",
+                function(cmp) {}
+            );
+        });
+    </script>
+</apex:page>
