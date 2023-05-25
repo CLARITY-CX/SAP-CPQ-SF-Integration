@@ -9,8 +9,8 @@ public class QuoteDocumentController {
         String action = ApexPages.currentPage().getParameters().get('action'); 
   
         SFCPQ_Integration_Settings__mdt integrationSettings = integrationSettingsList[0];
-        String routerParameter = integrationSettings.FSSO__c && String.isNotBlank(integrationSettings.IDP_Route__c) ? '/fed/' + integrationSettings.IDP_Route__c : '/integrations'; 
-        String authTokenParameter = integrationSettings.FSSO__c && String.isNotBlank(integrationSettings.IDP_Route__c) ? '' : '&authtoken=' + accessToken; 
+        String routerParameter = isFSSOEnabled(integrationSettings) ? '/fed/' + integrationSettings.IDP_Route__c + '/integrations' : '/integrations';
+        String authTokenParameter = isFSSOEnabled(integrationSettings) ? '' : '&authtoken=' + accessToken; 
         if (action == 'create') { 
             this.url = integrationSettings.CPQ_Environment_URL__c + routerParameter + '/crm/landing?action=create' + 
                                 '&opportunityid=' + recordid + 
@@ -44,14 +44,17 @@ public class QuoteDocumentController {
         SFCPQ_Integration_Settings__mdt integrationSettings = integrationSettingsList[0];
         String username = returnAuthUsername(integrationSettings);
         validateUsername(username);
-        String jwtToken = SecurityService.generateJWT('HS256',
-                                username,
-                                integrationSettings.SF_Environment_URL__c, 
-                                integrationSettings.CPQ_Environment_URL__c, 
-                                5, 
-                                integrationSettings.JWT_Token_Signing_Key__c); 
-        String accessToken = generateAccessToken(jwtToken, integrationSettings);
-        validateAccessToken(accessToken);
+        String accessToken;
+        if (! isFSSOEnabled(integrationSettings)) {
+            String jwtToken = SecurityService.generateJWT('HS256',
+                                    username,
+                                    integrationSettings.SF_Environment_URL__c, 
+                                    integrationSettings.CPQ_Environment_URL__c, 
+                                    5, 
+                                    integrationSettings.JWT_Token_Signing_Key__c); 
+            accessToken = generateAccessToken(jwtToken, integrationSettings);
+            validateAccessToken(accessToken);
+        }
         return accessToken; 
     } 
   
@@ -89,6 +92,11 @@ public class QuoteDocumentController {
             if (Test.isRunningTest()) { username = UserInfo.getUserName(); }
         }
         return username;
+    }
+
+
+    private static Boolean isFSSOEnabled(SFCPQ_Integration_Settings__mdt integrationSettings) {
+        return (integrationSettings.FSSO__c && String.isNotBlank(integrationSettings.IDP_Route__c));
     }
 
 
