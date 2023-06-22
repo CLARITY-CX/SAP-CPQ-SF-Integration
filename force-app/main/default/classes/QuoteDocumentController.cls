@@ -84,9 +84,9 @@ public class QuoteDocumentController {
         String username = UserInfo.getUserName();
         if (integrationSettings.Use_SFCPQ_Usernames_Mapping__c == true) {
             List<SFCPQ_Usernames_Mapping_Settings__c> usernamesMapping = [
-                SELECT SF_Username__c, CPQ_Username__c
+                SELECT SF_User__r.Username, CPQ_Username__c
                 FROM SFCPQ_Usernames_Mapping_Settings__c 
-                WHERE SF_Username__c = :username
+                WHERE SF_User__r.Username = :username
                 LIMIT 1];
             username = ! usernamesMapping.isEmpty() ? usernamesMapping[0].CPQ_Username__c : null;
             if (Test.isRunningTest()) { username = UserInfo.getUserName(); }
