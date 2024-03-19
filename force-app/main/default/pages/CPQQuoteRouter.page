@@ -1,5 +1,5 @@
-<apex:page showHeader="true" controller="QuoteDocumentController"> 
-   <script type="text/javascript"> 
+<apex:page showHeader="true" title="{!pageTitle}" controller="QuoteDocumentController">
+   <script type="text/javascript">
         document.onreadystatechange = function () { 
             var iframeElm = document.getElementById('iframe1'); 
             var parentStyle = window.getComputedStyle(iframeElm.offsetParent); 

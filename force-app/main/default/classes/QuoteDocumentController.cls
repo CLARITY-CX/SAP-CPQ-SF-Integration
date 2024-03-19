@@ -1,5 +1,6 @@
 public class QuoteDocumentController { 
-    public String url { get; set; } 
+    public String url { get; set; }
+    public String pageTitle { get; set; }
     private static List<SFCPQ_Integration_Settings__mdt> integrationSettingsList = SFCPQ_Integration_Settings__mdt.getAll().values();
     private static List<SFCPQ_Fields_Mapping_Settings__mdt> fieldsMappingSettingsList = SFCPQ_Fields_Mapping_Settings__mdt.getAll().values();
   
@@ -15,11 +16,11 @@ public class QuoteDocumentController {
             this.url = integrationSettings.CPQ_Environment_URL__c + routerParameter + '/crm/landing?action=create' + 
                                 '&opportunityid=' + recordid + 
                                 '&apisessionid=' + UserInfo.getSessionId() + 
-                                authTokenParameter; 
+                                authTokenParameter;
+            this.pageTitle = 'New Quote';
         } else {
             // action = 'edit', 'view', 'new'
-            List<SFCPQ_Fields_Mapping_Settings__mdt> fieldsMappingSettingsList = SFCPQ_Fields_Mapping_Settings__mdt.getAll().values(); 
-            if (! fieldsMappingSettingsList.isEmpty()) { 
+            if (! fieldsMappingSettingsList.isEmpty()) {
                 SFCPQ_Fields_Mapping_Settings__mdt fieldsMappingSettings = fieldsMappingSettingsList[0]; 
                 String query = 'SELECT Name, ' + fieldsMappingSettings.Quote_ID_Field_API_Name__c + ', ' + 
                                         fieldsMappingSettings.CPQ_Owner_ID_Field_API_Name__c + ', ' + 
@@ -33,7 +34,8 @@ public class QuoteDocumentController {
                                 '&ownerid=' + sobj.get(fieldsMappingSettings.CPQ_Owner_ID_Field_API_Name__c) + 
                                 '&opportunityid=' + sobj.get(fieldsMappingSettings.Opportunity_ID_Field_API_Name__c) + 
                                 '&apisessionid=' + UserInfo.getSessionId() + 
-                                authTokenParameter; 
+                                authTokenParameter;
+                this.pageTitle = String.valueOf(sobj.get('Name'));
             } 
         }
     } 
@@ -67,8 +69,7 @@ public class QuoteDocumentController {
         req.setEndpoint(integrationSettings.CPQ_Environment_URL__c + '/oauth2/token'); 
         req.setHeader('Authorization', 'Basic ' + EncodingUtil.base64Encode(Blob.valueOf(integrationSettings.Client_Identifier__c + ':' + integrationSettings.Client_Secret__c))); 
         req.setBody('grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer' + 
-                    '&assertion=' + jwtToken + 
-                    '&domain=' + integrationSettings.CPQ_Environment__c); 
+                    '&assertion=' + jwtToken);
         Http http = new Http(); 
         HTTPResponse response = http.send(req); 
                      
