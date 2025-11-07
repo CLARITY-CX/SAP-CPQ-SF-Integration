@@ -8,6 +8,7 @@ public class QuoteDocumentController {
         String recordid = ApexPages.currentPage().getParameters().get('recordid'); 
         String accessToken = ApexPages.currentPage().getParameters().get('token'); 
         String action = ApexPages.currentPage().getParameters().get('action'); 
+        String uniqueId = ApexPages.currentPage().getParameters().get('uniqueId');
   
         SFCPQ_Integration_Settings__mdt integrationSettings = integrationSettingsList[0];
         String routerParameter = isFSSOEnabled(integrationSettings) ? '/fed/' + integrationSettings.IDP_Route__c + '/integrations' : '/integrations';
@@ -16,6 +17,7 @@ public class QuoteDocumentController {
             this.url = integrationSettings.CPQ_Environment_URL__c + routerParameter + '/crm/landing?action=create' + 
                                 '&opportunityid=' + recordid + 
                                 '&apisessionid=' + UserInfo.getSessionId() + 
+                                '&uniqueId=' + uniqueId +
                                 authTokenParameter;
             this.pageTitle = 'New Quote';
         } else {

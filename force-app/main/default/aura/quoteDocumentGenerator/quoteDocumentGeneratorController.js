@@ -13,7 +13,8 @@
                     recordId = addressableContext.attributes.recordId;
                 }
                 let accessToken = response.getReturnValue();
-                let url = "/apex/cpqquoterouter?recordid=" + recordId + "&token=" + accessToken + "&action=create";
+                let uniqueId = Date.now() + '_' + Math.random().toString(36).slice(2, 11) + '_' + $A.get("$SObjectType.CurrentUser.Id");
+                let url = "/apex/cpqquoterouter?recordid=" + recordId + "&token=" + accessToken + "&action=create&uniqueId=" + uniqueId;
                 if (experience == 'lightning') {
                     let urlEvent = $A.get("e.force:navigateToURL");
                     urlEvent.setParams({ 
